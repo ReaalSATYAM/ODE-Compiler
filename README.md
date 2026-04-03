@@ -47,28 +47,12 @@ The system follows a **modular compiler pipeline**:
 
 ---
 
-## Project Structure
-
-```text
-src/
-├── compiler/
-│   ├── lexer.js       # Tokenizes input string
-│   ├── parser.js      # Generates AST
-│   ├── evaluator.js   # Walks AST to solve f(x, y)
-│   └── solver.js      # RK4 implementation
-├── components/
-│   └── ODESolverApp.jsx
-├── App.jsx
-├── main.jsx
-└── index.css
-```
-
 # Getting Started
 
 ### 1️ Clone the Repository
 ```bash
-git clone <your-repo-link>
-cd ode-compiler
+git clone https://github.com/ReaalSATYAM/ODE-Compiler
+cd ODE-Compiler
 ```
 ### 2️ Install Dependencies
 
