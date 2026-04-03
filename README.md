@@ -63,7 +63,7 @@ src/
 └── index.css
 ```
 
-# 🚀 Getting Started
+# Getting Started
 
 ### 1️ Clone the Repository
 ```bash
