@@ -1,0 +1,252 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base reset ── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: #020617;
+  color: #e2e8f0;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Scrollbar styling ── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(6, 182, 212, 0.2) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(6, 182, 212, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(6, 182, 212, 0.4);
+}
+
+/* ── Number input spinners ── */
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  opacity: 0.3;
+}
+
+/* ── Focus styles ── */
+input:focus {
+  outline: none;
+  border-color: rgba(6, 182, 212, 0.6) !important;
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+}
+
+/* ── Animations ── */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes tokenPop {
+  from {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* ── Utility classes ── */
+.animate-fade-up {
+  animation: fadeUp 0.5s ease both;
+}
+
+.animate-token-pop {
+  animation: tokenPop 0.3s ease both;
+}
+
+/* ── Glass card ── */
+.glass-card {
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(71, 85, 105, 0.35);
+  border-radius: 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-card:hover {
+  border-color: rgba(6, 182, 212, 0.2);
+  box-shadow: 0 0 30px rgba(6, 182, 212, 0.04);
+}
+
+/* ── Selection color ── */
+::selection {
+  background: rgba(6, 182, 212, 0.3);
+  color: #e2e8f0;
+}
+
+/* ── AST Tree Visualization ── */
+
+@keyframes nodeAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.5) translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Each node is a vertical flex column: badge on top, children below */
+.ast-tree-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+/* The node pill/badge */
+.ast-node-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 14px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--node-color) 12%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--node-color) 30%, transparent);
+  position: relative;
+  z-index: 2;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: default;
+}
+
+.ast-node-badge:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--node-color) 25%, transparent);
+}
+
+.ast-node-type {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: color-mix(in srgb, var(--node-color) 60%, transparent);
+}
+
+.ast-node-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--node-color);
+  line-height: 1;
+}
+
+/* Wrapper for the vertical stem + children row */
+.ast-children-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+/* Vertical line from parent badge down to the horizontal rail */
+.ast-stem {
+  width: 1.5px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* Horizontal row of children */
+.ast-children {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  position: relative;
+}
+
+/* Horizontal connector rail across siblings */
+.ast-children::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  height: 1.5px;
+  background: rgba(100, 116, 139, 0.2);
+  /* Spans from center of first child to center of last */
+  left: calc(50% / var(--child-count, 1));
+  right: calc(50% / var(--child-count, 1));
+}
+
+/* Each child branch: vertical drop line + subtree */
+.ast-child-branch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 12px;
+  position: relative;
+}
+
+/* Vertical connector from horizontal rail down to child node */
+.ast-branch-line {
+  width: 1.5px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* ── Horizontal rail width calculation using :has() ── */
+/* For 2 children: rail spans from center of first to center of last */
+.ast-children:has(> :nth-child(2):last-child)::before {
+  left: 25%;
+  right: 25%;
+}
+
+/* For 3 children */
+.ast-children:has(> :nth-child(3):last-child)::before {
+  left: 16.67%;
+  right: 16.67%;
+}
+
+/* For 1 child: no horizontal rail needed, just vertical */
+.ast-children:has(> :only-child)::before {
+  display: none;
+}

@@ -1,0 +1,17 @@
+export const TOKEN_TYPES = {
+  DYDX: "DYDX",
+  EQUAL: "EQUAL",
+
+  PLUS: "PLUS",
+  MINUS: "MINUS",
+  MUL: "MUL",
+  DIV: "DIV",
+  POW: "POW",
+
+  LPAREN: "LPAREN",
+  RPAREN: "RPAREN",
+
+  NUMBER: "NUMBER",
+  VARIABLE: "VARIABLE",
+  FUNCTION: "FUNCTION",
+};
