@@ -93,3 +93,10 @@ npm run dev
 *   **Expanded Math Library:** Support for `tan`, `pi`, `e`, and more constants.  
 *   **Robust Error Handling:** Better syntax error reporting in the UI.  
 *   **UI/UX:** Enhanced interactive AST visualization.
+
+## Note 
+The following files can be used to test the compiler
+* testEvaluator.js
+* testLexer.js
+* testParser.js
+* testSolver.js
