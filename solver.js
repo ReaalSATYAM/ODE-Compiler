@@ -9,7 +9,7 @@ export class ODESolver {
     let y = y0;
 
     const result = [];
-    result.push({ x, y });
+    result.push({ x, y, k1: 0, k2: 0, k3: 0, k4: 0 });
 
     for (let i = 0; i < steps; i++) {
       const k1 = h * this.f(x, y);
@@ -20,7 +20,7 @@ export class ODESolver {
       y = y + (k1 + 2 * k2 + 2 * k3 + k4) / 6;
       x = x + h;
 
-      result.push({ x, y });
+      result.push({ x, y, k1, k2, k3, k4 });
     }
 
     return result;

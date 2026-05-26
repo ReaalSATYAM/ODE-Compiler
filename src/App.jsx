@@ -8,7 +8,7 @@ import {
   ResponsiveContainer, ReferenceLine,
 } from "recharts";
 
-// ─── SVG Icon Components ─────────────────────────────────────────────────────
+// SVG Icon Components 
 
 function IconTokens({ className = "" }) {
   return (
@@ -73,8 +73,7 @@ function IconCurve({ className = "" }) {
   );
 }
 
-// ─── Compiler pipeline ───────────────────────────────────────────────────────
-
+// Compiler pipeline 
 function compile(input) {
   const lexer = new Lexer(input);
   const tokens = lexer.tokenize();
@@ -88,19 +87,19 @@ function compile(input) {
 function extractSymbols(ast) {
   const vars = new Set();
   const funcs = new Set();
+  const ops = new Set();
   function walk(node) {
     if (!node) return;
     if (node.type === "Variable") vars.add(node.name);
     if (node.type === "FunctionCall") { funcs.add(node.name); walk(node.argument); }
-    if (node.type === "BinaryOp") { walk(node.left); walk(node.right); }
+    if (node.type === "BinaryOp") { ops.add(node.operator); walk(node.left); walk(node.right); }
     if (node.type === "Equation") walk(node.right);
   }
   walk(ast);
-  return { vars: [...vars], funcs: [...funcs] };
+  return { vars: [...vars], funcs: [...funcs], ops: [...ops] };
 }
 
-// ─── Token style map ─────────────────────────────────────────────────────────
-
+// Token style map
 const TOKEN_COLORS = {
   DYDX:     { bg: "rgba(244,63,94,0.15)", border: "rgba(244,63,94,0.35)", color: "#fb7185", label: "dy/dx" },
   EQUAL:    { bg: "rgba(148,163,184,0.12)", border: "rgba(148,163,184,0.3)", color: "#94a3b8", label: "=" },
@@ -116,8 +115,11 @@ const TOKEN_COLORS = {
   FUNCTION: { bg: "rgba(167,139,250,0.12)", border: "rgba(167,139,250,0.3)", color: "#a78bfa", label: null },
 };
 
-// ─── AST tree renderer ───────────────────────────────────────────────────────
+const OP_PRECEDENCE = {
+  PLUS: 10, MINUS: 10, MUL: 20, DIV: 20, POW: 30
+};
 
+// AST tree renderer
 function ASTNode({ node, depth = 0, isRoot = true }) {
   if (!node) return null;
 
@@ -156,7 +158,6 @@ function ASTNode({ node, depth = 0, isRoot = true }) {
 
   return (
     <div className="ast-tree-node">
-      {/* Node badge */}
       <div
         className="ast-node-badge"
         style={{
@@ -171,16 +172,12 @@ function ASTNode({ node, depth = 0, isRoot = true }) {
         <span className="ast-node-value">{String(valueLabel)}</span>
       </div>
 
-      {/* Children with connector lines */}
       {children.length > 0 && (
         <div className="ast-children-wrapper">
-          {/* Vertical stem from parent */}
           <div className="ast-stem" style={{ background: `${c}40` }} />
-          {/* Children container */}
           <div className="ast-children">
             {children.map((ch, i) => (
               <div key={i} className="ast-child-branch">
-                {/* Vertical connector down to child */}
                 <div className="ast-branch-line" style={{ background: `${colorMap[ch?.type] || "#94a3b8"}35` }} />
                 <ASTNode node={ch} depth={depth + 1} isRoot={false} />
               </div>
@@ -192,7 +189,7 @@ function ASTNode({ node, depth = 0, isRoot = true }) {
   );
 }
 
-// ─── Custom chart tooltip ────────────────────────────────────────────────────
+// Custom chart tooltip 
 
 function CustomTooltip({ active, payload }) {
   if (active && payload?.length) {
@@ -215,7 +212,7 @@ function CustomTooltip({ active, payload }) {
   return null;
 }
 
-// ─── Pipeline step labels ────────────────────────────────────────────────────
+// Pipeline step labels
 
 const PIPELINE_STEPS = ["Tokenize", "Parse", "Symbols", "Evaluate", "Solve"];
 
@@ -228,8 +225,7 @@ const EXAMPLES = [
   "dy/dx = exp(x) - y",
 ];
 
-// ─── Main App ────────────────────────────────────────────────────────────────
-
+// Main App 
 export default function App() {
   const [equation, setEquation] = useState("dy/dx = x + y");
   const [x0, setX0] = useState("0");
@@ -253,7 +249,7 @@ export default function App() {
   const rafRef = useRef(null);
   const stepTimersRef = useRef([]);
 
-  // ── Animated hue + mouse follow gradient ──
+  // ── Animated hue + mouse follow gradient
   useEffect(() => {
     let mouseX = 50, mouseY = 50;
     const handleMouse = (e) => {
@@ -285,7 +281,7 @@ export default function App() {
     };
   }, []);
 
-  // ── Animate tokens one-by-one ──
+  // ── Animate tokens one-by-one 
   const animateTokens = useCallback((toks) => {
     setVisibleTokens([]);
     toks.forEach((tok, i) => {
@@ -296,9 +292,8 @@ export default function App() {
     });
   }, []);
 
-  // ── Run step-by-step reveal ──
+  // Run step-by-step reveal 
   const runStepMode = useCallback((toks) => {
-    // Clear old timers
     stepTimersRef.current.forEach(clearTimeout);
     stepTimersRef.current = [];
 
@@ -326,9 +321,8 @@ export default function App() {
     stepTimersRef.current.push(t1, t2, t3, t4, t5);
   }, [animateTokens]);
 
-  // ── Solve handler ──
+  // Solve handler
   const handleSolve = useCallback(async () => {
-    // Clear old step timers
     stepTimersRef.current.forEach(clearTimeout);
     stepTimersRef.current = [];
 
@@ -359,7 +353,7 @@ export default function App() {
         runStepMode(toks);
       } else {
         animateTokens(toks);
-        setActiveStep(5); // show everything immediately
+        setActiveStep(5); 
       }
     } catch (e) {
       setError(e.message);
@@ -368,7 +362,6 @@ export default function App() {
     }
   }, [equation, x0, y0, h, steps, stepMode, animateTokens, runStepMode]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => stepTimersRef.current.forEach(clearTimeout);
   }, []);
@@ -434,7 +427,6 @@ export default function App() {
 
         {/* ── Input Card ── */}
         <div className="glass-card p-6 mb-6" style={{ animationDelay: "0.1s" }}>
-          {/* Example equation pills */}
           <div className="flex flex-wrap gap-2 mb-5">
             {EXAMPLES.map(ex => (
               <button
@@ -700,7 +692,7 @@ export default function App() {
               </div>
             )}
 
-            {/* Symbol Table */}
+            {/* Symbol Table & Precedence */}
             {stepVisible(3) && symbols && (
               <div
                 className="glass-card p-5"
@@ -708,37 +700,131 @@ export default function App() {
               >
                 <div className="flex items-center gap-2.5 mb-4">
                   <IconTable className="text-violet-400" />
-                  <h3 className="text-xs font-bold tracking-widest uppercase text-slate-400">Symbol Table</h3>
+                  <h3 className="text-xs font-bold tracking-widest uppercase text-slate-400">Symbols & Precedence</h3>
                 </div>
-                <p className="text-xs text-slate-600 mb-3">Extracted identifiers</p>
-                <div className="space-y-3">
+                <p className="text-xs text-slate-600 mb-4">Extracted identifiers and operators</p>
+                
+                <div className="space-y-8">
+                  {/* Symbol Table */}
                   <div>
-                    <p className="text-xs text-slate-500 font-mono mb-1.5">Variables</p>
-                    <div className="flex gap-2 flex-wrap">
-                      {symbols.vars.length ? symbols.vars.map(v => (
-                        <span
-                          key={v}
-                          className="px-3 py-1 rounded-lg text-xs font-mono font-bold"
-                          style={{ background: "rgba(34,211,238,0.1)", border: "1px solid rgba(34,211,238,0.35)", color: "#22d3ee" }}
-                        >
-                          {v}
-                        </span>
-                      )) : <span className="text-slate-600 text-xs">none</span>}
+                    <h4 className="text-[11px] text-slate-500 font-mono mb-2.5 uppercase tracking-wider">Symbol Table</h4>
+                    <div className="overflow-hidden rounded-xl" style={{ border: "1px solid rgba(71,85,105,0.3)" }}>
+                      <table className="w-full text-xs font-mono text-left">
+                        <thead style={{ background: "rgba(15,23,42,0.9)", borderBottom: "1px solid rgba(71,85,105,0.3)" }}>
+                          <tr>
+                            <th className="px-4 py-2.5 text-slate-500 font-medium w-12 border-r border-slate-700/50">#</th>
+                            <th className="px-4 py-2.5 text-slate-400 font-medium border-r border-slate-700/50">Symbol Name</th>
+                            <th className="px-4 py-2.5 text-slate-400 font-medium">Token Type</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(() => {
+                            let idx = 0;
+                            const rows = [];
+                            symbols.vars.forEach(v => {
+                              rows.push(
+                                <tr key={`var-${v}`} className="border-b border-slate-700/50 hover:bg-slate-800/40 transition-colors">
+                                  <td className="px-4 py-2 text-slate-600 border-r border-slate-700/50">{idx++}</td>
+                                  <td className="px-4 py-2 text-cyan-400 font-bold border-r border-slate-700/50">{v}</td>
+                                  <td className="px-4 py-2 text-slate-400">Identifier</td>
+                                </tr>
+                              );
+                            });
+                            symbols.funcs.forEach(f => {
+                              rows.push(
+                                <tr key={`func-${f}`} className="border-b border-slate-700/50 hover:bg-slate-800/40 transition-colors">
+                                  <td className="px-4 py-2 text-slate-600 border-r border-slate-700/50">{idx++}</td>
+                                  <td className="px-4 py-2 text-purple-400 font-bold border-r border-slate-700/50">{f}</td>
+                                  <td className="px-4 py-2 text-slate-400">Function</td>
+                                </tr>
+                              );
+                            });
+                            symbols.ops.forEach(op => {
+                              rows.push(
+                                <tr key={`op-${op}`} className="border-b border-slate-700/50 hover:bg-slate-800/40 transition-colors last:border-0">
+                                  <td className="px-4 py-2 text-slate-600 border-r border-slate-700/50">{idx++}</td>
+                                  <td className="px-4 py-2 text-amber-400 font-bold border-r border-slate-700/50">{TOKEN_COLORS[op]?.label || op}</td>
+                                  <td className="px-4 py-2 text-slate-400">Operator</td>
+                                </tr>
+                              );
+                            });
+                            if (rows.length === 0) {
+                              rows.push(<tr key="empty"><td colSpan="3" className="px-4 py-4 text-center text-slate-500 italic">No symbols found</td></tr>);
+                            }
+                            return rows;
+                          })()}
+                        </tbody>
+                      </table>
                     </div>
                   </div>
-                  {symbols.funcs.length > 0 && (
+
+                  {/* Precedence Table */}
+                  {symbols.ops.length > 0 && (
                     <div>
-                      <p className="text-xs text-slate-500 font-mono mb-1.5">Functions</p>
-                      <div className="flex gap-2 flex-wrap">
-                        {symbols.funcs.map(fn => (
-                          <span
-                            key={fn}
-                            className="px-3 py-1 rounded-lg text-xs font-mono font-bold"
-                            style={{ background: "rgba(167,139,250,0.1)", border: "1px solid rgba(167,139,250,0.35)", color: "#a78bfa" }}
-                          >
-                            {fn}(·)
-                          </span>
-                        ))}
+                      <h4 className="text-[11px] text-slate-500 font-mono mb-6 uppercase tracking-wider text-center">Operator Precedence Matrix</h4>
+                      
+                      <div className="flex justify-center overflow-x-auto pb-4">
+                        <div className="relative mt-2 ml-2">
+                          {/* Top label 'g' */}
+                          <div className="absolute -top-6 left-0 right-0 text-center text-slate-400 font-mono text-sm font-bold">g</div>
+                          
+                          {/* Left label 'f' */}
+                          <div className="absolute -left-6 top-0 bottom-0 flex items-center justify-center text-slate-400 font-mono text-sm font-bold">f</div>
+                          
+                          <table className="text-[13px] font-mono text-center border-collapse shadow-lg" style={{ background: "rgba(15,23,42,0.6)" }}>
+                            <thead>
+                              <tr>
+                                <th className="w-11 h-11 border border-slate-600/80 bg-slate-800/60"></th>
+                                {(() => {
+                                  const sortedOps = [...symbols.ops].sort((a,b) => OP_PRECEDENCE[b] - OP_PRECEDENCE[a]);
+                                  return ['id', ...sortedOps, '$'].map(col => (
+                                    <th key={`col-${col}`} className="w-11 h-11 border border-slate-600/80 bg-slate-800/60 text-slate-300 font-semibold">
+                                      {col === 'id' || col === '$' ? col : TOKEN_COLORS[col]?.label || col}
+                                    </th>
+                                  ));
+                                })()}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {(() => {
+                                const sortedOps = [...symbols.ops].sort((a,b) => OP_PRECEDENCE[b] - OP_PRECEDENCE[a]);
+                                const rowCols = ['id', ...sortedOps, '$'];
+                                
+                                return rowCols.map(row => (
+                                  <tr key={`row-${row}`}>
+                                    <th className="w-11 h-11 border border-slate-600/80 bg-slate-800/60 text-slate-300 font-semibold">
+                                      {row === 'id' || row === '$' ? row : TOKEN_COLORS[row]?.label || row}
+                                    </th>
+                                    {rowCols.map(col => {
+                                      let rel = '';
+                                      if (row === 'id' && col === 'id') rel = '';
+                                      else if (row === 'id') rel = '.>';
+                                      else if (col === 'id') rel = '<.';
+                                      else if (row === '$' && col === '$') rel = '';
+                                      else if (row === '$') rel = '<.';
+                                      else if (col === '$') rel = '.>';
+                                      else {
+                                        const precRow = OP_PRECEDENCE[row] || 0;
+                                        const precCol = OP_PRECEDENCE[col] || 0;
+                                        if (precRow > precCol) rel = '.>';
+                                        else if (precRow < precCol) rel = '<.';
+                                        else rel = (row === 'POW') ? '<.' : '.>';
+                                      }
+                                      
+                                      return (
+                                        <td key={`cell-${row}-${col}`} className="w-11 h-11 border border-slate-600/80 text-slate-300 transition-colors hover:bg-slate-800/40">
+                                          <span className={rel === '<.' ? 'text-cyan-400 font-bold' : rel === '.>' ? 'text-amber-400 font-bold' : ''}>
+                                            {rel}
+                                          </span>
+                                        </td>
+                                      );
+                                    })}
+                                  </tr>
+                                ));
+                              })()}
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -818,6 +904,10 @@ export default function App() {
                         <th className="px-4 py-2.5 text-left text-slate-500 font-medium">#</th>
                         <th className="px-4 py-2.5 text-left font-medium" style={{ color: "#22d3ee" }}>x</th>
                         <th className="px-4 py-2.5 text-left font-medium" style={{ color: "#fbbf24" }}>y</th>
+                        <th className="px-3 py-2.5 text-left font-medium text-slate-400">k₁</th>
+                        <th className="px-3 py-2.5 text-left font-medium text-slate-400">k₂</th>
+                        <th className="px-3 py-2.5 text-left font-medium text-slate-400">k₃</th>
+                        <th className="px-3 py-2.5 text-left font-medium text-slate-400">k₄</th>
                         <th className="px-4 py-2.5 text-left font-medium" style={{ color: "#34d399" }}>Δy</th>
                       </tr>
                     </thead>
@@ -831,6 +921,10 @@ export default function App() {
                           <td className="px-4 py-1.5 text-slate-600">{i}</td>
                           <td className="px-4 py-1.5" style={{ color: "#22d3ee" }}>{p.x.toFixed(4)}</td>
                           <td className="px-4 py-1.5" style={{ color: "#fbbf24" }}>{p.y.toFixed(6)}</td>
+                          <td className="px-3 py-1.5 text-slate-400">{i > 0 ? p.k1.toFixed(4) : "—"}</td>
+                          <td className="px-3 py-1.5 text-slate-400">{i > 0 ? p.k2.toFixed(4) : "—"}</td>
+                          <td className="px-3 py-1.5 text-slate-400">{i > 0 ? p.k3.toFixed(4) : "—"}</td>
+                          <td className="px-3 py-1.5 text-slate-400">{i > 0 ? p.k4.toFixed(4) : "—"}</td>
                           <td className="px-4 py-1.5" style={{ color: "#34d399" }}>
                             {i > 0 ? (p.y - solutionData[i - 1].y).toFixed(6) : "—"}
                           </td>

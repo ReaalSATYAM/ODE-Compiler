@@ -13,31 +13,33 @@ A modular compiler-inspired tool to parse, evaluate, and numerically solve first
 - **RK4 Solver:** High-accuracy numerical solving using the 4th Order Runge-Kutta method.
 - **Visualizations:** 
     - Interactive solution curve graphs.
-    - Token stream and AST tree views.
-    - Live Symbol Table display.
+    - Token stream and hierarchical AST tree views.
+    - Live Symbol Table and 2D Operator Precedence Matrix.
 - **Execution:** Step-by-step processing .
 
 ---
 
 ## Architecture
 
-The system follows a **modular compiler pipeline**:
+The system follows a **modular compiler pipeline** paired with a numerical engine.
 
+[![](https://mermaid.ink/img/pako:eNqVVNtu00AQ_ZXRVkUgnBDfE1dF8jWqgBI15QXMw9beJBbO2lrbrUPbn-IT-DLWl9hxC6LZh2g8mXNmZ-bM3qMgCQky0CpO7oINZjlcOz4Ffk5P4fxfp4v4hCMKHse-FNP8mt989CUjDC5oWuQGfHZcWOYsomsffW9CqjMavX_wERmvxxDu3oUlnEMJb2H3-5ePHsDiJB9JSViNaVBWi7lOfhBaURK8rWJtHrtgOM9hgVk2gNgtxE5olrMiyLMK4HCAecMdOMhhuaM5LuGaETIEjmvknFDCuUkNXNSZSEBCQgPCG8TLKuEV59jeJHF2gHe6xNs0ihu0y9HuLY4LnCeHl3Tb2NXrUoDdG_AKGuRRQiuMxzFXHxS4LLaERQGOYZnEt4MavYNUBb8oLJKINoXOq1FcwJzhdANXhIakG8MROlgWN-uKIXsJponJWgjYVcvaJjBYRCmJI0oGQrB60-5NpzcXvek2Jq_kWabLqr19m1y6fprIewZ-Wfn5Lq669uLigxhnmUNWEFULAKsojo0T0ZXNqSlw0XH1Gicz2VY9RwiSOGHGyao-7Z-juyjMN4aUlmdP-NJa3i2hbsum63SEtmIdT4iz_fUm6kzTZh2b5rq6pR_JRri2WzrXVKcTu6PzHMvUlSPpslroLaFjS5qk9YS2qZrqkYRFtC_W0zXN7Wcx8zT32NttSJx2t-O9VzW5I3RER3WsvxOGOOMvMcM7A1RQzwaaAbORzGEusAS7HfzA7VTDG3jcegADl9c2ceCc80YMHIu2mLODtdjvPGSH6q8-CN_pvaZFcSrpvWhkTfPEZ50b9uGQ6NLdE3nSTO6JXE_h5z9ESEBrFoXI4O86ERDf-y2uPtF9lcJH-YZs-f4b3Awx--Ejnz5yTIrp1yTZ7mEsKdYbZKxwnPGvIg35U-9EmNe-7bysfjjtpKA5MqqaaxZk3KMSGdJkMhb1ma4okqjLiq4KaIeMkawqY1UWpYmkqZIkz6aPAvpZ5xXHsiJOdE0Sp6rK41X58Q9I3lRo?type=png)](https://mermaid.live/edit#pako:eNqVVNtu00AQ_ZXRVkUgnBDfE1dF8jWqgBI15QXMw9beJBbO2lrbrUPbn-IT-DLWl9hxC6LZh2g8mXNmZ-bM3qMgCQky0CpO7oINZjlcOz4Ffk5P4fxfp4v4hCMKHse-FNP8mt989CUjDC5oWuQGfHZcWOYsomsffW9CqjMavX_wERmvxxDu3oUlnEMJb2H3-5ePHsDiJB9JSViNaVBWi7lOfhBaURK8rWJtHrtgOM9hgVk2gNgtxE5olrMiyLMK4HCAecMdOMhhuaM5LuGaETIEjmvknFDCuUkNXNSZSEBCQgPCG8TLKuEV59jeJHF2gHe6xNs0ihu0y9HuLY4LnCeHl3Tb2NXrUoDdG_AKGuRRQiuMxzFXHxS4LLaERQGOYZnEt4MavYNUBb8oLJKINoXOq1FcwJzhdANXhIakG8MROlgWN-uKIXsJponJWgjYVcvaJjBYRCmJI0oGQrB60-5NpzcXvek2Jq_kWabLqr19m1y6fprIewZ-Wfn5Lq669uLigxhnmUNWEFULAKsojo0T0ZXNqSlw0XH1Gicz2VY9RwiSOGHGyao-7Z-juyjMN4aUlmdP-NJa3i2hbsum63SEtmIdT4iz_fUm6kzTZh2b5rq6pR_JRri2WzrXVKcTu6PzHMvUlSPpslroLaFjS5qk9YS2qZrqkYRFtC_W0zXN7Wcx8zT32NttSJx2t-O9VzW5I3RER3WsvxOGOOMvMcM7A1RQzwaaAbORzGEusAS7HfzA7VTDG3jcegADl9c2ceCc80YMHIu2mLODtdjvPGSH6q8-CN_pvaZFcSrpvWhkTfPEZ50b9uGQ6NLdE3nSTO6JXE_h5z9ESEBrFoXI4O86ERDf-y2uPtF9lcJH-YZs-f4b3Awx--Ejnz5yTIrp1yTZ7mEsKdYbZKxwnPGvIg35U-9EmNe-7bysfjjtpKA5MqqaaxZk3KMSGdJkMhb1ma4okqjLiq4KaIeMkawqY1UWpYmkqZIkz6aPAvpZ5xXHsiJOdE0Sp6rK41X58Q9I3lRo)
 1.  **User Input**: String representation of the ODE.
-2.  **Lexer**: Breaks input into a stream of tokens.
-3.  **Parser**: Transforms tokens into an Abstract Syntax Tree (AST).
-4.  **Evaluator**: Computes the numerical value of the expression at `(x, y)`.
-5.  **RK4 Solver**: Iteratively calculates the numerical solution.
-6.  **Visualization**: Renders the graph and UI components.
+2.  **Lexer**: Breaks input into a stream of typed tokens.
+3.  **Pratt Parser**: Transforms tokens into an Abstract Syntax Tree (AST) using strict operator precedence rules.
+4.  **Evaluator**: Dynamically compiles the AST into an executable JS function for `f(x, y)`.
+5.  **RK4 Solver**: Iteratively calculates the numerical solution using the compiled expression.
+6.  **Visualization**: Renders the data points, token stream, symbol table, precedence matrix, and AST.
 
 ---
 
 ## Tech Stack
 
-### Backend (Compiler Logic)
+### Compiler Logic & Numerical Engine
 - **JavaScript (ES Modules)**
-- **Custom Lexer & Parser**: Recursive Descent Parsing.
-- **Numerical Methods**: RK4 algorithm.
+- **Custom Lexer**: Robust tokenization for mathematical symbols.
+- **Custom Parser**: Operator Precedence (Pratt) Parser for nested mathematical syntax.
+- **Numerical Methods**: RK4 numerical integration algorithm.
 
 ### Frontend
 - **React**: UI Framework.
@@ -95,7 +97,7 @@ npm run dev
 *   **UI/UX:** Enhanced interactive AST visualization.
 
 ## Note 
-The following files can be used to test the compiler
+The following files can be used to test the compiler (Unit Tests)
 * testEvaluator.js
 * testLexer.js
 * testParser.js
